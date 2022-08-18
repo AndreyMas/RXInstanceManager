@@ -19,7 +19,7 @@
 Текущая версия совместима с версиями DirectumLauncher: 4.2, 4.3, 4.4.
 
 ## Установка утилиты
-Установка осуществляется из самораспаковывающегося архива: [Последняя версия](https://github.com/AndreyMas/RXInstanceManager/releases/download/v0.9.08082022/RXInstanceManager_08082022.exe).
+Установка осуществляется из самораспаковывающегося архива: [Последняя версия](https://github.com/AndreyMas/RXInstanceManager/releases/download/v0.9.18082022/RXInstanceManager_18082022.exe).
 
 После распаковки необходимо запустить RCInstanceManager.exe. Рекомендуется вынести ярлык на рабочий стол или закрепить в панели быстрого доступа или на начальном экране в меню "Пуск".
 

@@ -54,15 +54,11 @@ namespace RXInstanceManager
                 File.WriteAllText(configYamlPath, example);
             }
 
-            Config config = null;
-            var instance = Instances.Get().FirstOrDefault(x => x.InstancePath == instancePath);
-            if (instance != null)
-                config = instance.Config;
-
+            var config = Configs.Get().FirstOrDefault(x => x.Path == configYamlPath);
             if (config == null)
             {
                 config = new Config();
-                config.Instance = instance;
+                config.Instance = Instances.Get().FirstOrDefault(x => x.InstancePath == instancePath);
                 config.Path = configYamlPath;
             }
 
@@ -156,30 +152,28 @@ namespace RXInstanceManager
         public static string GetInstancePlatformVersion(string instancePath)
         {
             var platformBuildsPath = AppHelper.GetPlatformBuildsPath(instancePath);
-            if (!Directory.Exists(platformBuildsPath))
-                return Constants.NullVersion;
-
-            var directoryInfo = new DirectoryInfo(platformBuildsPath);
-            var subDirectories = directoryInfo.GetDirectories();
-            if (!subDirectories.Any())
-                return Constants.NullVersion;
-
-            var versionDirectory = subDirectories.FirstOrDefault(x => x.Name.StartsWith("4."));
-            if (versionDirectory == null)
-                return Constants.NullVersion;
-
-            return versionDirectory.Name;
+            return GetSolutionVersion(platformBuildsPath);
         }
 
         public static string GetInstanceSolutionVersion(string instancePath)
         {
             var solutionBuildsPath = AppHelper.GetDirectumRXBuildsPath(instancePath);
+            return GetSolutionVersion(solutionBuildsPath);
+        }
+
+        private static string GetSolutionVersion(string solutionBuildsPath)
+        {
             if (!Directory.Exists(solutionBuildsPath))
                 return Constants.NullVersion;
 
             var manifestFile = Path.Combine(solutionBuildsPath, "manifest.json");
             if (!File.Exists(manifestFile))
-                return Constants.NullVersion;
+            {
+                var directoryInfo = new DirectoryInfo(solutionBuildsPath);
+                var subDirectories = directoryInfo.GetDirectories();
+                if (subDirectories.Count(x => x.Name.StartsWith("4.")) == 1)
+                    return subDirectories.FirstOrDefault(x => x.Name.StartsWith("4.")).Name;
+            }
 
             var json = File.ReadAllText(manifestFile);
             var solution = JsonSerializer.Deserialize<Solution>(json);

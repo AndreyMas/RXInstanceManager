@@ -103,35 +103,36 @@ namespace RXInstanceManager
             if (!isValid)
                 return;
 
-            var config = AppHandlers.GetInstanceConfig(instancePath);
-            var yamlValues = YamlSimple.Parser.Parse(config.Body);
-
-            var instanceCode = yamlValues.GetConfigStringValue("variables.instance_name");
-            if (string.IsNullOrEmpty(instanceCode))
-            {
-                instanceCode = Dialogs.ShowEnterValueDialog("Укажите код системы");
-                if (string.IsNullOrEmpty(instanceCode))
-                    return;
-
-                if (!AppHelper.ValidateInputCode(instanceCode))
-                {
-                    MessageBox.Show("Код должен быть более от 4 до 10 символов английского алфавита в нижнем регистре и цифр");
-                    return;
-                }
-            }
-
-            var instance = Instances.Get().FirstOrDefault(x => x.Code == instanceCode);
-            if (instance != null)
-            {
-                MessageBox.Show($"Экземпляр DirectumRX с кодом \"{instanceCode}\" уже добавлен");
-                LoadInstances(instance);
-                return;
-            }
-
-            AppHandlers.SetConfigStringValue(config, "variables.instance_name", instanceCode);
-
+            Instance instance;
             try
             {
+                var config = AppHandlers.GetInstanceConfig(instancePath);
+                var yamlValues = YamlSimple.Parser.Parse(config.Body);
+
+                var instanceCode = yamlValues.GetConfigStringValue("variables.instance_name");
+                if (string.IsNullOrEmpty(instanceCode))
+                {
+                    instanceCode = Dialogs.ShowEnterValueDialog("Укажите код системы");
+                    if (string.IsNullOrEmpty(instanceCode))
+                        return;
+
+                    if (!AppHelper.ValidateInputCode(instanceCode))
+                    {
+                        MessageBox.Show("Код должен быть более от 4 до 10 символов английского алфавита в нижнем регистре и цифр");
+                        return;
+                    }
+                }
+
+                instance = Instances.Get().FirstOrDefault(x => x.Code == instanceCode);
+                if (instance != null)
+                {
+                    MessageBox.Show($"Экземпляр DirectumRX с кодом \"{instanceCode}\" уже добавлен");
+                    LoadInstances(instance);
+                    return;
+                }
+
+                AppHandlers.SetConfigStringValue(config, "variables.instance_name", instanceCode);
+
                 instance = new Instance();
                 instance.Code = instanceCode;
                 instance.InstancePath = instancePath;
@@ -145,13 +146,14 @@ namespace RXInstanceManager
                     config.Instance = instance;
                     config.Save();
                 }
+
+                _instance = instance;
             }
             catch (Exception ex)
             {
-                AppHandlers.ErrorHandler(instance, ex);
+                AppHandlers.ErrorHandler(null, ex);
             }
 
-            _instance = instance;
             LoadInstances(_instance);
         }
 

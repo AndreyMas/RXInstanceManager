@@ -46,25 +46,14 @@ namespace RXInstanceManager
         {
             using (var connection = new SQLiteConnection(DBInitializer.ConnectionString))
             {
-                return connection.Query<Config>(DBInitializer.QueryGenerator.GenerateSelectQuery<Config>()).ToList();
-            }
-        }
-
-        public static List<Config> GetLessOrEqualVersion(string version)
-        {
-            using (var connection = new SQLiteConnection(DBInitializer.ConnectionString))
-            {
-                var addWhere = new AddWhere<Config>("Version", SQLQueryGen.Constants.Expression.LessOrEqual, version);
-                return connection.Query<Config>(DBInitializer.QueryGenerator.GenerateSelectQuery<Config>(addWhere)).ToList();
-            }
-        }
-
-        public static List<Config> GetGreaterOrEqualVersion(string version)
-        {
-            using (var connection = new SQLiteConnection(DBInitializer.ConnectionString))
-            {
-                var addWhere = new AddWhere<Config>("Version", SQLQueryGen.Constants.Expression.MoreOrEqual, version);
-                return connection.Query<Config>(DBInitializer.QueryGenerator.GenerateSelectQuery<Config>(addWhere)).ToList();
+                return connection.Query<Config, Instance, Config>(
+                DBInitializer.QueryGenerator.GenerateSelectQuery<Config>(),
+                (config, linkedinstance) =>
+                {
+                    config.Instance = linkedinstance != null && linkedinstance.Id > 0 ? linkedinstance : null;
+                    return config;
+                },
+                splitOn: "Instance").ToList();
             }
         }
 

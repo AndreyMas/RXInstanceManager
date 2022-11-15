@@ -76,7 +76,11 @@ namespace RXInstanceManager
 
         public static string GetPlatformBuildsPath(string instancePath)
         {
-            return Path.Combine(instancePath, "etc", "_builds", "PlatformBuilds");
+            var path = Path.Combine(instancePath, "etc", "_builds", "PlatformBuilds");
+            if (Directory.Exists(path))
+                return path;
+
+            return Path.Combine(instancePath, "etc", "_builds", "Platform");
         }
 
         public static string GetDirectumRXBuildsPath(string instancePath)

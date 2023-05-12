@@ -10,7 +10,7 @@ namespace RXInstanceManager
     {
         public static string ShowEnterValueDialog(string emptyValue, string defaultValue = null)
         {
-            var dialog = new EnterValueDialog(defaultValue);
+            var dialog = new EnterValueDialog(emptyValue, defaultValue);
 
             var dialogResult = dialog.ShowDialog();
             if (!dialogResult.HasValue || !dialogResult.Value)

@@ -95,7 +95,7 @@ namespace RXInstanceManager
         {
             AppHandlers.InfoHandler(_instance, MethodBase.GetCurrentMethod().Name);
 
-            var instancePath = Dialogs.ShowEnterValueDialog("Укажите путь до инстанса");
+            var instancePath = Dialogs.ShowEnterValueDialog("Укажите путь до инстанса...");
             if (instancePath == null)
                 return;
 
@@ -112,13 +112,13 @@ namespace RXInstanceManager
                 var instanceCode = yamlValues.GetConfigStringValue("variables.instance_name");
                 if (string.IsNullOrEmpty(instanceCode))
                 {
-                    instanceCode = Dialogs.ShowEnterValueDialog("Укажите код системы");
+                    instanceCode = Dialogs.ShowEnterValueDialog("Укажите код системы... (до 10 символов английского алфавита и цифры)");
                     if (string.IsNullOrEmpty(instanceCode))
                         return;
 
                     if (!AppHelper.ValidateInputCode(instanceCode))
                     {
-                        MessageBox.Show("Код должен быть более от 4 до 10 символов английского алфавита в нижнем регистре и цифр");
+                        MessageBox.Show("Код должен быть более от 4 до 10 символов английского алфавита и цифр");
                         return;
                     }
                 }
@@ -131,7 +131,7 @@ namespace RXInstanceManager
                     return;
                 }
 
-                AppHandlers.SetConfigStringValue(config, "variables.instance_name", instanceCode);
+                AppHandlers.SetConfigStringValue(config, instancePath, "variables.instance_name", instanceCode);
 
                 instance = new Instance();
                 instance.Code = instanceCode;
@@ -173,9 +173,16 @@ namespace RXInstanceManager
 
             try
             {
-                var serviceStatus = AppHandlers.GetServiceStatus(_instance);
-                if (serviceStatus == Constants.InstanceStatus.NeedInstall)
-                    AppHandlers.LaunchProcess(AppHelper.GetDirectumLauncherPath(_instance.InstancePath));
+                if (Directory.Exists(AppHelper.GetBuildsBinPath(_instance.InstancePath)))
+                {
+                    AppHandlers.ExecuteDoCommands(_instance.InstancePath, "do iis configure", "do all up");
+                }
+                else
+                {
+                    var serviceStatus = AppHandlers.GetServiceStatus(_instance);
+                    if (serviceStatus == Constants.InstanceStatus.NeedInstall)
+                        AppHandlers.LaunchProcess(AppHelper.GetDirectumLauncherPath(_instance.InstancePath));
+                }
             }
             catch (Exception ex)
             {
@@ -416,7 +423,7 @@ namespace RXInstanceManager
 
             //MessageBox.Show(AppHandlers.GetInstanceSolutionVersion(_instance.InstancePath));
 
-            AppHandlers.SetConfigStringValue(_instance.Config, "variables.instance_name", "test");
+            //AppHandlers.SetConfigStringValue(_instance.Config, "variables.instance_name", "test");
         }
 
 

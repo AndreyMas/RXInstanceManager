@@ -7,6 +7,22 @@ namespace RXInstanceManager
 {
     public static class AppHelper
     {
+        public static bool PingURL(string url)
+        {
+            Uri uri = new Uri(url);
+            try
+            {
+                HttpWebRequest httpWebRequest = (HttpWebRequest)HttpWebRequest.Create(uri);
+                HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public static string Base64EncodeFromUTF8(string plainText)
         {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
@@ -41,7 +57,7 @@ namespace RXInstanceManager
 
         public static bool ValidateInputCode(string code)
         {
-            return code.Length > 3 && code.Length <= 10 && code.All(x => (x >= 'a' && x <= 'z') || (x >= '0' && x <= '9'));
+            return code.Length > 3 && code.Length <= 10 && code.All(x => (x >= 'a' && x <= 'z') || (x >= 'A' && x <= 'Z') || (x >= '0' && x <= '9'));
         }
 
         public static bool ValidateInputDBName(string name)
@@ -74,6 +90,11 @@ namespace RXInstanceManager
             return Path.Combine(instancePath, "etc", "_builds");
         }
 
+        public static string GetBuildsBinPath(string instancePath)
+        {
+            return Path.Combine(instancePath, "etc", "_builds_bin");
+        }
+
         public static string GetPlatformBuildsPath(string instancePath)
         {
             var path = Path.Combine(instancePath, "etc", "_builds", "PlatformBuilds");
@@ -102,14 +123,14 @@ namespace RXInstanceManager
         {
             if (engine == "mssql")
             {
-                var databaseNameParam = connectionString.Split(';').FirstOrDefault(x => x.Contains("initial catalog"));
+                var databaseNameParam = connectionString.Split(';').FirstOrDefault(x => x.ToLower().Contains("initial catalog"));
                 if (databaseNameParam != null)
                     return databaseNameParam.Split('=')[1];
             }
 
             if (engine == "postgres")
             {
-                var databaseNameParam = connectionString.Split(';').FirstOrDefault(x => x.Contains("Database"));
+                var databaseNameParam = connectionString.Split(';').FirstOrDefault(x => x.ToLower().Contains("database"));
                 if (databaseNameParam != null)
                     return databaseNameParam.Split('=')[1];
             }

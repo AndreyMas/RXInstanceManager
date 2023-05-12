@@ -260,7 +260,7 @@ namespace RXInstanceManager
                 }
 
                 var localProtocol = yamlValues.GetConfigStringValue("services_config.DevelopmentStudio.LOCAL_WEB_PROTOCOL");
-                if (!string.IsNullOrWhiteSpace(localProtocol) && localProtocol != "http")
+                if (!string.IsNullOrWhiteSpace(localProtocol) && localProtocol != "http" && localProtocol != "{{ protocol }}")
                 {
                     MessageBox.Show("Указан некорректный протокол в параметре \"services_config.DevelopmentStudio.LOCAL_WEB_PROTOCOL\" файла config.yml");
                     return false;

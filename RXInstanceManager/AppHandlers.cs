@@ -8,6 +8,8 @@ using System.ServiceProcess;
 using System.Security.Principal;
 using System.Security.AccessControl;
 using NLog;
+using System.Linq.Expressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace RXInstanceManager
 {
@@ -111,9 +113,30 @@ namespace RXInstanceManager
             return null;
         }
 
-        public static void SetConfigStringValue(Config config, string key, string value)
+        public static void SetConfigStringValue(Config config, string instancePath, string key, string value)
         {
-            YamlSimple.Parser.UpdateFileStringValue(config.Path, key, value);
+            var isKeyExists = YamlSimple.Parser.CheckFileKey(config.Path, key);
+            try
+            {
+                if (!isKeyExists)
+                {
+                    ExecuteDoCommands(instancePath, "do all down");
+                    YamlSimple.Parser.AddFileStringValue(config.Path, key, value);
+                }
+                else
+                    YamlSimple.Parser.UpdateFileStringValue(config.Path, key, value);
+            }
+            catch (UnauthorizedAccessException aex)
+            {
+                ExecuteCmdCommand($"icacls {config.Path} /grant:r *S-1-1-0:F", true);
+                if (!isKeyExists)
+                {
+                    ExecuteDoCommands(instancePath, "do all down");
+                    YamlSimple.Parser.AddFileStringValue(config.Path, key, value);
+                }
+                else
+                    YamlSimple.Parser.UpdateFileStringValue(config.Path, key, value);
+            }
         }
 
         #endregion

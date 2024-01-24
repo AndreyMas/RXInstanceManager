@@ -86,10 +86,11 @@ namespace RXInstanceManager
             ButtonDelete.Visibility = Visibility.Collapsed;
             ButtonDDSStart.Visibility = Visibility.Collapsed;
             ButtonRXStart.Visibility = Visibility.Collapsed;
+            ButtonLogViewer.Visibility = Visibility.Collapsed;
 
             RestartContext.Visibility = Visibility.Collapsed;
             ConfigContext.Visibility = _instance == null ? Visibility.Collapsed : Visibility.Visible;
-            CmdContext.Visibility = _instance == null ? Visibility.Collapsed : Visibility.Visible;
+            LogsContext.Visibility = _instance == null ? Visibility.Collapsed : Visibility.Visible;
             CmdAdminContext.Visibility = _instance == null ? Visibility.Collapsed : Visibility.Visible;
             InfoContext.Visibility = _instance == null ? Visibility.Collapsed : Visibility.Visible;
 
@@ -107,12 +108,16 @@ namespace RXInstanceManager
                     ButtonRXStart.Visibility = Visibility.Visible;
                     ButtonStop.Visibility = Visibility.Visible;
                     RestartContext.Visibility = Visibility.Visible;
+                    if (!string.IsNullOrEmpty(AppInitializer.Config.LogViewerPath))
+                        ButtonLogViewer.Visibility = Visibility.Visible;
                     break;
                 case Constants.InstanceStatus.Stopped:
                     //ButtonCopy.Visibility = Visibility.Visible;
                     ButtonDelete.Visibility = Visibility.Visible;
                     ButtonStart.Visibility = Visibility.Visible;
                     RestartContext.Visibility = Visibility.Visible;
+                    if (!string.IsNullOrEmpty(AppInitializer.Config.LogViewerPath))
+                        ButtonLogViewer.Visibility = Visibility.Visible;
                     break;
             }
         }
@@ -237,8 +242,9 @@ namespace RXInstanceManager
                 return false;
             }
 
+            var dbNameFromVar = yamlValues.GetConfigStringValue("variables.database");
             var connection = yamlValues.GetConfigStringValue("common_config.CONNECTION_STRING");
-            var dbName = AppHelper.GetDBNameFromConnectionString(dbEngine, connection);
+            var dbName = AppHelper.GetDBNameFromConnectionString(dbEngine, connection, dbNameFromVar);
             if (!string.IsNullOrWhiteSpace(dbName))
             {
                 if (instances.Any(x => x.Code != _instance.Code && x.DBName == dbName))

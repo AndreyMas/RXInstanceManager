@@ -4,7 +4,6 @@ using System.Linq;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Threading;
 using System.Reflection;
 using Microsoft.Win32;
 
@@ -24,6 +23,7 @@ namespace RXInstanceManager
             if (!Directory.Exists(Constants.LogPath))
                 Directory.CreateDirectory(Constants.LogPath);
 
+            AppInitializer.Initialize();
             DBInitializer.Initialize();
             Instances.Create();
             Configs.Create();
@@ -95,15 +95,23 @@ namespace RXInstanceManager
         {
             AppHandlers.InfoHandler(_instance, MethodBase.GetCurrentMethod().Name);
 
-            var instancePath = Dialogs.ShowEnterValueDialog("Укажите путь до инстанса...");
-            if (instancePath == null)
-                return;
+            Instance instance;
+            var instancePath = string.Empty;
+
+            using (var openFolderDialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                openFolderDialog.RootFolder = Environment.SpecialFolder.MyComputer;
+                var result = openFolderDialog.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(openFolderDialog.SelectedPath))
+                    instancePath = openFolderDialog.SelectedPath;
+                else
+                    return;
+            }
 
             var isValid = ValidateBeforeAddInstance(instancePath);
             if (!isValid)
                 return;
 
-            Instance instance;
             try
             {
                 var config = AppHandlers.GetInstanceConfig(instancePath);
@@ -306,6 +314,33 @@ namespace RXInstanceManager
             }
         }
 
+        private void ButtonLogViewer_Click(object sender, RoutedEventArgs e)
+        {
+            AppHandlers.InfoHandler(_instance, MethodBase.GetCurrentMethod().Name);
+
+            if (string.IsNullOrEmpty(_instance.LogsPath))
+            {
+                AppHandlers.DebugHandler(_instance, _instance.LogsPath != null ? _instance.LogsPath : string.Empty);
+                AppHandlers.ErrorHandler(_instance, "Не вычислен путь к логам инстанса");
+                return;
+            }
+
+            try
+            {
+                using (var regKey = Registry.CurrentUser.OpenSubKey(@"Software\JsonLogViewerSettings", false))
+                {
+                    if (regKey != null && (string)regKey.GetValue("LogsPath") != _instance.LogsPath)
+                        AppHandlers.ExecuteCmdCommands(true, false, "REG ADD HKCU\\Software\\JsonLogViewerSettings /v LogsPath /t REG_SZ /d \"" + _instance.LogsPath + "\" /f");
+                }
+
+                AppHandlers.LaunchProcess(AppInitializer.Config.LogViewerPath);
+            }
+            catch (Exception ex)
+            {
+                AppHandlers.ErrorHandler(_instance, ex);
+            }
+        }
+
         #endregion
 
         #region ContextHandlers
@@ -345,22 +380,6 @@ namespace RXInstanceManager
             }
         }
 
-        private void CmdContext_Click(object sender, RoutedEventArgs e)
-        {
-            AppHandlers.InfoHandler(_instance, MethodBase.GetCurrentMethod().Name);
-
-            if (_instance == null)
-                return;
-            try
-            {
-                AppHandlers.ExecuteCmdCommand($"cd {_instance.InstancePath}", false);
-            }
-            catch (Exception ex)
-            {
-                AppHandlers.ErrorHandler(_instance, ex);
-            }
-        }
-
         private void CmdAdminContext_Click(object sender, RoutedEventArgs e)
         {
             AppHandlers.InfoHandler(_instance, MethodBase.GetCurrentMethod().Name);
@@ -371,6 +390,41 @@ namespace RXInstanceManager
             try
             {
                 AppHandlers.ExecuteCmdCommand($"cd {_instance.InstancePath}", true);
+            }
+            catch (Exception ex)
+            {
+                AppHandlers.ErrorHandler(_instance, ex);
+            }
+        }
+
+        private void LogsContext_Click(object sender, RoutedEventArgs e)
+        {
+            AppHandlers.InfoHandler(_instance, MethodBase.GetCurrentMethod().Name);
+
+            if (_instance == null)
+                return;
+
+            try
+            {
+                AppHandlers.LaunchProcess(_instance.LogsPath);
+            }
+            catch (Exception ex)
+            {
+                AppHandlers.ErrorHandler(_instance, ex);
+            }
+        }
+
+        private void RemoveContext_Click(object sender, RoutedEventArgs e)
+        {
+            AppHandlers.InfoHandler(_instance, MethodBase.GetCurrentMethod().Name);
+
+            if (_instance == null)
+                return;
+
+            try
+            {
+                Instances.Delete(_instance);
+                LoadInstances();
             }
             catch (Exception ex)
             {
@@ -426,6 +480,6 @@ namespace RXInstanceManager
             //AppHandlers.SetConfigStringValue(_instance.Config, "variables.instance_name", "test");
         }
 
-
+        
     }
 }

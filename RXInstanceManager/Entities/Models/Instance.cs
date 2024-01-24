@@ -43,6 +43,12 @@ namespace RXInstanceManager
         [Field("sources", Size = 150)]
         public string SourcesPath { get; set; }
 
+        [Field("project", Size = 150)]
+        public string ProjectPath { get; set; }
+
+        [Field("logs", Size = 150)]
+        public string LogsPath { get; set; }
+
         [Field("status", Size = 12)]
         public string Status { get; set; }
 
@@ -61,6 +67,8 @@ namespace RXInstanceManager
             builder.AppendLine("Путь до инстанса:   " + InstancePath ?? string.Empty);
             builder.AppendLine("Путь до хранилища:  " + StoragePath ?? string.Empty);
             builder.AppendLine("Путь до исходников: " + SourcesPath ?? string.Empty);
+            builder.AppendLine("Путь до логов:      " + LogsPath ?? string.Empty);
+            builder.AppendLine("Путь до проекта:    " + ProjectPath ?? string.Empty);
             builder.AppendLine("Имя службы:         " + ServiceName ?? string.Empty);
             builder.AppendLine("Имя БД:             " + DBName ?? string.Empty);
             return builder.ToString();

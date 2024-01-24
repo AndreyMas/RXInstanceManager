@@ -38,12 +38,13 @@
                 <Button x:Name="ButtonInstruction" Content="Инструкция" Style="{DynamicResource RecordActionButton}" Background="DimGray" Click="ButtonInstruction_Click" />
                 <Button x:Name="ButtonAdd" Content="Добавить" Style="{DynamicResource RecordActionButton}" Margin="10,5,5,5" Background="SkyBlue" Click="ButtonAdd_Click" />
                 <Button x:Name="ButtonInstall" Content="Установить" Style="{DynamicResource RecordActionButton}" Background="MediumSlateBlue" Click="ButtonInstall_Click" />
-                <Button x:Name="ButtonDelete" Content="Удалить" Style="{DynamicResource RecordActionButton}" Background="OrangeRed" Click="ButtonDelete_Click" />
+                <Button x:Name="ButtonDelete" Content="Удалить" Style="{DynamicResource RecordActionButton}" Background="DarkRed" Click="ButtonDelete_Click" />
                 <Button x:Name="ButtonCopy" Content="Копировать" Style="{DynamicResource RecordActionButton}" Background="ForestGreen" Click="ButtonCopy_Click" />
                 <Button x:Name="ButtonStart" Content="Запустить" Style="{DynamicResource RecordActionButton}" Background="SteelBlue" Click="ButtonStart_Click" />
                 <Button x:Name="ButtonStop" Content="Остановить" Style="{DynamicResource RecordActionButton}" Background="SteelBlue" Click="ButtonStop_Click" />
                 <Button x:Name="ButtonDDSStart" Content="Запустить DDS" Style="{DynamicResource RecordActionButton}" Background="GreenYellow" Click="ButtonDDSStart_Click" />
                 <Button x:Name="ButtonRXStart" Content="Запустить RX" Style="{DynamicResource RecordActionButton}" Background="Violet" Click="ButtonRXStart_Click" />
+                <Button x:Name="ButtonLogViewer" Content="Запустить LogViewer" Style="{DynamicResource RecordActionButton}" Background="DarkOrange" Click="ButtonLogViewer_Click"/>
             </StackPanel>
             <DataGrid x:Name="GridInstances" AutoGenerateColumns="False" Style="{DynamicResource DataGridStyle}" Grid.Row="1" SelectionChanged="GridInstances_SelectionChanged" >
                 <DataGrid.Columns>
@@ -54,13 +55,15 @@
                     <DataGridTextColumn Binding="{Binding DBName}" Header="Имя БД" Width="100" />
                     <DataGridTextColumn Binding="{Binding Status}" Header="Статус" Width="80" />
                     <DataGridTextColumn Binding="{Binding Name}" Header="Назначение" Width="250" />
+                    <DataGridTextColumn Binding="{Binding ProjectPath}" Header="Проект" Width="250" />
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu x:Name="InstancesContextMenu">
                         <MenuItem x:Name="ConfigContext" Header="Открыть config.yml" Click="ConfigContext_Click" />
                         <MenuItem x:Name="RestartContext" Header="Пересобрать из config.yml" Click="RestartContext_Click" />
-                        <MenuItem x:Name="CmdContext" Header="Запустить cmd" Click="CmdContext_Click" />
                         <MenuItem x:Name="CmdAdminContext" Header="Запустить cmd (от администратора)" Click="CmdAdminContext_Click" />
+                        <MenuItem x:Name="LogsContext" Header="Открыть папку логов" Click="LogsContext_Click" />
+                        <MenuItem x:Name="RemoveContext" Header="Убрать инстанс из списка" Click="RemoveContext_Click" />
                         <MenuItem x:Name="InfoContext" Header="Информация" Click="InfoContext_Click" />
                     </ContextMenu>
                 </DataGrid.ContextMenu>

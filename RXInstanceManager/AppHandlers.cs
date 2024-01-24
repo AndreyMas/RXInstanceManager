@@ -81,16 +81,19 @@ namespace RXInstanceManager
 
             var protocol = yamlValues.GetConfigStringValue("variables.protocol");
             var host = yamlValues.GetConfigStringValue("variables.host_fqdn");
+            var dbNameFromVar = yamlValues.GetConfigStringValue("variables.database");
             var dbEngine = yamlValues.GetConfigStringValue("common_config.DATABASE_ENGINE");
             var connection = yamlValues.GetConfigStringValue("common_config.CONNECTION_STRING");
-            var dbName = AppHelper.GetDBNameFromConnectionString(dbEngine, connection);
+            var dbName = AppHelper.GetDBNameFromConnectionString(dbEngine, connection, dbNameFromVar);
 
             instance.Name = yamlValues.GetConfigStringValue("variables.purpose");
             instance.Port = yamlValues.GetConfigIntValue("variables.http_port") ?? 0;
             instance.URL = AppHelper.GetClientURL(protocol, host, instance.Port);
             instance.DBName = dbName ?? string.Empty;
             instance.StoragePath = yamlValues.GetConfigStringValue("variables.home_path");
-            instance.SourcesPath = yamlValues.GetConfigStringValue("services_config.DevelopmentStudio.GIT_ROOT_DIRECTORY");
+            instance.SourcesPath = AppHelper.GetSourcesPath(instance.StoragePath, yamlValues.GetConfigStringValue("services_config.DevelopmentStudio.GIT_ROOT_DIRECTORY"));
+            instance.LogsPath = AppHelper.GetLogsPath(instance.StoragePath, yamlValues.GetConfigStringValue("logs_path.LOGS_PATH"));
+            instance.ProjectPath = yamlValues.GetConfigStringValue("variables.project_config_path");
             instance.PlatformVersion = GetInstancePlatformVersion(instance.InstancePath);
             instance.SolutionVersion = GetInstanceSolutionVersion(instance.InstancePath);
             instance.Save();
@@ -220,6 +223,22 @@ namespace RXInstanceManager
             var path = instance != null ? instance.InstancePath : string.Empty;
             var logBody = string.Format($"Code: {code}, Path: {path}, Message: {message}");
             logger.Info(logBody);
+        }
+
+        public static void DebugHandler(Instance instance, string message)
+        {
+            var code = instance != null ? instance.Code : string.Empty;
+            var path = instance != null ? instance.InstancePath : string.Empty;
+            var logBody = string.Format($"Code: {code}, Path: {path}, Message: {message}");
+            logger.Debug(logBody);
+        }
+
+        public static void ErrorHandler(Instance instance, string message)
+        {
+            var code = instance != null ? instance.Code : string.Empty;
+            var path = instance != null ? instance.InstancePath : string.Empty;
+            var logBody = string.Format($"Code: {code}, Path: {path}, Message: {message}");
+            logger.Error(logBody);
         }
 
         public static void ErrorHandler(Instance instance, Exception exception)

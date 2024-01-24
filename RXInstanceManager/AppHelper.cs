@@ -119,20 +119,44 @@ namespace RXInstanceManager
             return $"{protocol}://{host}:{port}/Client";
         }
 
-        public static string GetDBNameFromConnectionString(string engine, string connectionString)
+        public static string GetLogsPath(string storagePath, string logsPath)
+        {
+            return logsPath
+                .Replace("{{ home_path }}", storagePath)
+                .Replace("{{home_path}}", storagePath);
+        }
+
+        public static string GetSourcesPath(string storagePath, string sourcesPath)
+        {
+            return sourcesPath
+                .Replace("{{ home_path }}", storagePath)
+                .Replace("{{home_path}}", storagePath);
+        }
+
+        public static string GetDBName(string dbName, string dbNameFromVar)
+        {
+            if (string.IsNullOrEmpty(dbNameFromVar))
+                return dbName;
+
+            return dbName
+                .Replace("{{ database }}", dbNameFromVar)
+                .Replace("{{database}}", dbNameFromVar);
+        }
+
+        public static string GetDBNameFromConnectionString(string engine, string connectionString, string dbNameFromVar)
         {
             if (engine == "mssql")
             {
                 var databaseNameParam = connectionString.Split(';').FirstOrDefault(x => x.ToLower().Contains("initial catalog"));
                 if (databaseNameParam != null)
-                    return databaseNameParam.Split('=')[1];
+                    return GetDBName(databaseNameParam.Split('=')[1], dbNameFromVar);
             }
 
             if (engine == "postgres")
             {
                 var databaseNameParam = connectionString.Split(';').FirstOrDefault(x => x.ToLower().Contains("database"));
                 if (databaseNameParam != null)
-                    return databaseNameParam.Split('=')[1];
+                    return GetDBName(databaseNameParam.Split('=')[1], dbNameFromVar);
             }
 
             return null;
